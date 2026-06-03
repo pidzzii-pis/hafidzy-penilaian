@@ -2,40 +2,57 @@
 session_start();
 include "koneksi.php";
 /** @var mysqli $koneksi */
+
+
 $prodi = mysqli_query($koneksi, "SELECT * FROM prodi");
 $error = "";
 
+
 if (isset($_POST['simpan'])) {
-    $nis = $_POST['nis'];
-    $nama = $_POST['nama'];
-    $kelas = $_POST['kelas'];
-    $tahun_ajaran = $_POST['tahun_ajaran'];
-    $kd_prodi = $_POST['kd_prodi'];
-    $jk = isset($_POST['jenis_kelamin']) ? $_POST['jenis_kelamin'] : '';
+    $nis          = mysqli_real_escape_with_str($koneksi, $_POST['nis'] ?? '');
+    $nama         = mysqli_real_escape_with_str($koneksi, $_POST['nama'] ?? '');
+    $kelas        = mysqli_real_escape_with_str($koneksi, $_POST['kelas'] ?? '');
+    $tahun_ajaran = mysqli_real_escape_with_str($koneksi, $_POST['tahun_ajaran'] ?? '');
+    $kd_prodi     = mysqli_real_escape_with_str($koneksi, $_POST['kd_prodi'] ?? '');
+    $jk           = $_POST['jenis_kelamin'] ?? '';
     
-    // Ambil Data File Foto
-    $foto_name = $_FILES['foto']['name'];
-    $foto_tmp = $_FILES['foto']['tmp_name'];
+   
+    $foto_name    = $_FILES['foto']['name'] ?? '';
+    $foto_tmp     = $_FILES['foto']['tmp_name'] ?? '';
     
-    //  Validasi Semua Field Tidak Boleh Kosong
+    // Validasi Semua Field Tidak Boleh Kosong
     if (empty($nis) || empty($nama) || empty($kelas) || empty($tahun_ajaran) || empty($kd_prodi) || empty($jk)) {
         $error = "Semua data wajib diisi, tidak boleh ada yang kosong!";
     } else {
-        //  Proses Upload Foto Profil
+        // Proses Upload Foto Profil
         if (!empty($foto_name)) {
             $ekstensi = pathinfo($foto_name, PATHINFO_EXTENSION);
-            $nama_foto_baru = $nis . "_" . time() . "." . $ekstensi; // Rename unik
+            $nama_foto_baru = $nis . "_" . time() . "." . $ekstensi; 
+            
+            // Buat folder uploads jika belum ada
+            if (!is_dir('uploads')) {
+                mkdir('uploads', 0777, true);
+            }
             move_uploaded_file($foto_tmp, "uploads/" . $nama_foto_baru);
         } else {
-            $nama_foto_baru = "default.png"; // Default jika tidak upload
+            $nama_foto_baru = "default.png"; 
         }
 
-        mysqli_query($koneksi, "INSERT INTO siswa (nis, nama, kelas, tahun_ajaran, kd_prodi, jenis_kelamin, foto) 
-        VALUES ('$nis', '$nama', '$kelas', '$tahun_ajaran', '$kd_prodi', '$jk', '$nama_foto_baru')");
+        $query = "INSERT INTO siswa (nis, nama, kelas, tahun_ajaran, kd_prodi, jenis_kelamin, foto) 
+                  VALUES ('$nis', '$nama', '$kelas', '$tahun_ajaran', '$kd_prodi', '$jk', '$nama_foto_baru')";
         
-        header("location: siswa.php");
-        exit();
+        if (mysqli_query($koneksi, $query)) {
+            header("location: siswa.php");
+            exit();
+        } else {
+            $error = "Gagal menyimpan data ke database: " . mysqli_error($koneksi);
+        }
     }
+}
+
+
+function mysqli_real_escape_with_str($conn, $data) {
+    return mysqli_real_escape_string($conn, trim($data));
 }
 ?>
 
@@ -51,7 +68,7 @@ if (isset($_POST['simpan'])) {
     <div class="container">
         <h2>TAMBAH DATA SISWA</h2>
         <hr>
-        <?php if(!empty($error)) { echo "<p style='color:red;'>$error</p>"; } ?>
+        <?php if(!empty($error)) { echo "<p style='color:red; font-weight:bold;'>$error</p>"; } ?>
         
         <form method="POST" enctype="multipart/form-data">
             <table>
@@ -64,9 +81,15 @@ if (isset($_POST['simpan'])) {
                     <td>
                         <select name="kd_prodi" required>
                             <option value="">-- Pilih Prodi --</option>
-                            <?php while ($p = mysqli_fetch_assoc($prodi)) { ?>
-                                <option value="<?php echo $p['kd_prodi']; ?>"><?php echo $p['nama_prodi']; ?></option>
-                            <?php } ?>
+                            <?php 
+                            if ($prodi && mysqli_num_rows($prodi) > 0) {
+                                while ($p = mysqli_fetch_assoc($prodi)) { 
+                                    echo "<option value='".$p['kd_prodi']."'>".$p['nama_prodi']."</option>";
+                                }
+                            } else {
+                                echo "<option value=''>Data prodi di database masih kosong!</option>";
+                            }
+                            ?>
                         </select>
                     </td>
                 </tr>

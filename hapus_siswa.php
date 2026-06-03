@@ -6,22 +6,43 @@ if(!isset($_SESSION['login']) || $_SESSION['login'] != true){
     header("location: index.php?p=Silahkan login terlebih dahulu!");
     exit();
 }
-$id = $_GET['id_prodi'];
+$param_url = $_GET['nis'] ?? ($_GET['id'] ?? ($_GET['id_prodi'] ?? ''));
 
-//cek apakah ada data
-$cek = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id='$id'");
-$data = mysqli_fetch_assoc($cek);
-if(!$data){
-    header("location: siswa.php?p=Data tidak ditemukan");
+if (empty($param_url)) {
+    header("location: siswa.php?p=Parameter ID atau NIS tidak ditemukan!");
     exit();
 }
-//proses hapus
-$hapus = mysqli_query($koneksi, "DELETE FROM siswa WHERE id='$id'");
+
+
+$cek = mysqli_query($koneksi, "SELECT * FROM siswa WHERE nis = '$param_url'");
+$data = mysqli_fetch_assoc($cek);
+
+if (!$data && is_numeric($param_url)) {
+    $query_id = mysqli_query($koneksi, "SELECT * FROM siswa LIMIT 1 OFFSET " . ($param_url - 1));
+    $data = mysqli_fetch_assoc($query_id);
+}
+
+if(!$data){
+    header("location: siswa.php?p=Data siswa tidak ditemukan di database!");
+    exit();
+}
+
+
+$nis_hapus = $data['nis'];
+
+
+$hapus = mysqli_query($koneksi, "DELETE FROM siswa WHERE nis = '$nis_hapus'");
+
 if ($hapus) {
+
+    if (!empty($data['foto']) && $data['foto'] != 'default.png' && file_exists("uploads/" . $data['foto'])) {
+        unlink("uploads/" . $data['foto']);
+    }
+    
     header("location: siswa.php?p=Data berhasil dihapus!");
     exit();
 } else {
-    header("location: siswa.php?p=Gagal menghapus data!");
+    header("location: siswa.php?p=Gagal menghapus data dari database!");
     exit();
 }
 ?>

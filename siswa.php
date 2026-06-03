@@ -8,17 +8,17 @@ if(!isset($_SESSION['login']) || $_SESSION['login'] != true){
 include "koneksi.php";
 /** @var mysqli $koneksi */
 
-//  Menangkap kata kunci pencarian jika ada
+
 $search = isset($_GET['cari']) ? $_GET['cari'] : '';
 
-//  Jika kolom pencarian diisi, filter data berdasarkan Nama, NIS, atau Nama Prodi
+
 if (!empty($search)) {
     $data = mysqli_query($koneksi, "SELECT s.*, p.nama_prodi 
         FROM siswa s 
         JOIN prodi p ON s.kd_prodi = p.kd_prodi 
         WHERE s.nama LIKE '%$search%' OR s.nis LIKE '%$search%' OR p.nama_prodi LIKE '%$search%'");
 } else {
-    // Jika tidak mencari, ambil semua data seperti semula
+   
     $data = mysqli_query($koneksi, "SELECT s.*, p.nama_prodi FROM siswa s JOIN prodi p ON s.kd_prodi = p.kd_prodi");
 }
 ?>
@@ -81,8 +81,8 @@ if (!empty($search)) {
                     <td><?php echo $row['tahun_ajaran']; ?></td>
                     <td><?php echo $row['nama_prodi']; ?></td>
                     <td>
-                        <a href="edit_siswa.php?id=<?php echo $row['id']; ?>">EDIT</a> | 
-                        <a href="hapus_siswa.php?id=<?php echo $row['id']; ?>" onclick="return confirm('Yakin ingin hapus?')">DELETE</a>
+                        <a href="edit_siswa.php?id=<?php echo $row['nis']; ?>">EDIT</a> | 
+                        <a href="hapus_siswa.php?id=<?php echo $row['nis']; ?>" onclick="return confirm('Yakin ingin hapus?')">DELETE</a>
                     </td>
                 </tr>
                 <?php } ?>
