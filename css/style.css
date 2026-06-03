@@ -55,8 +55,11 @@ body {
     font-size: 18px;
     color: white;
     display: block;
+    transition: 0.2s;
+    transform: scaleX(1);
 }
 .side-nav a:hover{
+    transform: scaleX(1.1);
     background-color: #285b86;
 }
 .btn-close {
@@ -120,4 +123,12 @@ th{
 th, td {
     padding: 10px;
     border-bottom: 1px solid  #ddd;
+}
+.pesan {
+    color: green;
+    background-color: #d4edda;
+    padding: 10px; 
+    border: 1px solid #c3e6cb; 
+    margin-bottom: 15px; 
+    font-weight: bold;
 }

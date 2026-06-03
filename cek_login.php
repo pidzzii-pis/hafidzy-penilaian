@@ -1,8 +1,7 @@
 <?php
 session_start();
-
-//panggil koneksi
 include "koneksi.php";
+/** @var mysqli $koneksi */
 
 //ambil data dari form
 $username = $_POST['user'];

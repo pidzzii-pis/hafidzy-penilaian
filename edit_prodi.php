@@ -1,6 +1,12 @@
 <?php
 session_start();
 include "koneksi.php";
+/** @var mysqli $koneksi */
+header("Cache-Control: no-store, no-chache, must-revilidate, max-age=0");
+if(!isset($_SESSION['login']) || $_SESSION['login'] != true){
+    header("location: index.php?p=Silahkan login terlebih dahulu!");
+    exit();
+}
 $id_prodi = $_GET['id_prodi'];
 $query = mysqli_query($koneksi, "SELECT * FROM prodi WHERE id_prodi='$id_prodi'");
 $data = mysqli_fetch_assoc($query);

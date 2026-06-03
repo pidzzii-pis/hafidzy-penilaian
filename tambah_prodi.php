@@ -1,6 +1,11 @@
-<?php 
+<?php
 session_start();
 include "koneksi.php";
+/** @var mysqli $koneksi */
+if(!isset($_SESSION['login']) || $_SESSION['login'] != true){
+    header("location: index.php?p=Silahkan login terlebih dahulu!");
+    exit();
+}
 $error = "";
 
 //proses simpan

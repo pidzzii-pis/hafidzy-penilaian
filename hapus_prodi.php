@@ -1,6 +1,11 @@
 <?php
 session_start();
 include "koneksi.php";
+/** @var mysqli $koneksi */
+if(!isset($_SESSION['login']) || $_SESSION['login'] != true){
+    header("location: index.php?p=Silahkan login terlebih dahulu!");
+    exit();
+}
 $id_prodi = $_GET['id_prodi'];
 
 //cek apakah prodi dipakai di tabel siswa
