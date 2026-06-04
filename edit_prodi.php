@@ -10,28 +10,24 @@ if(!isset($_SESSION['login']) || $_SESSION['login'] != true){
     exit();
 }
 
-$param_url = $_GET['kd_prodi'] ?? ($_GET['id_prodi'] ?? ($_GET['id'] ?? ''));
+$kd_prodi_target = $_GET['kd_prodi'] ?? '';
 
-if (empty($param_url)) {
-    die("Akses ditolak: Parameter Kode Prodi atau ID tidak ditemukan di URL!");
+if (empty($kd_prodi_target)) {
+    header("location: prodi.php?p=Parameter tidak ditemukan!");
+    exit();
 }
 
-$query = mysqli_query($koneksi, "SELECT * FROM prodi WHERE kd_prodi = '$param_url'");
+$query = mysqli_query($koneksi, "SELECT * FROM prodi WHERE kd_prodi = '$kd_prodi_target'");
 $data = mysqli_fetch_assoc($query);
 
-if (!$data && is_numeric($param_url)) {
-    $query_id = mysqli_query($koneksi, "SELECT * FROM prodi LIMIT 1 OFFSET " . ($param_url - 1));
-    $data = mysqli_fetch_assoc($query_id);
-}
-
 if (!$data) {
-    die("Data program studi dengan parameter '" . htmlspecialchars($param_url) . "' tidak ditemukan di database!");
+    header("location: prodi.php?p=Data prodi tidak ditemukan!");
+    exit();
 }
 
-$kd_prodi_target = $data['kd_prodi'];
 $error = "";
 
-// 2. Proses pengiriman form update data ke database
+// Proses simpan perubahan data prodi
 if(isset($_POST['update'])) {
     $kd_prodi   = mysqli_real_escape_string($koneksi, $_POST['kd_prodi']);
     $nama_prodi = mysqli_real_escape_string($koneksi, $_POST['nama_prodi']);
